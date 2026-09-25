@@ -1,0 +1,64 @@
+# CUDA variant of ./Dockerfile.
+#
+# Same app, same lockfile. The only difference is the torch wheel: the lock pins the
+# CPU build, so torch is skipped during `uv sync` and installed from the CUDA index
+# instead. The NVIDIA driver comes from the host via the NVIDIA container runtime
+# (`--gpus all` / compose `deploy.resources.reservations.devices`).
+#
+# cu126 needs a host driver that supports CUDA >= 12.6 (R560+). Override with
+# --build-arg TORCH_CUDA=cu130 on newer drivers.
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+
+LABEL org.opencontainers.image.title="laya-api-cuda" \
+      org.opencontainers.image.description="Laya typed-decision prediction API (CUDA)" \
+      org.opencontainers.image.licenses="MIT"
+
+ARG TORCH_VERSION=2.14.0
+ARG TORCH_CUDA=cu126
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    HF_HOME=/data/hf \
+    PORT=8000 \
+    DEVICE=cuda \
+    PATH="/app/.venv/bin:$PATH"
+
+RUN useradd --create-home --uid 10001 appuser
+
+WORKDIR /app
+
+COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-package torch \
+ && uv pip install --python /app/.venv/bin/python \
+        "torch==${TORCH_VERSION}" --index-url "https://download.pytorch.org/whl/${TORCH_CUDA}"
+
+COPY --chown=appuser:appuser app ./app
+
+RUN mkdir -p /data/hf && chown -R appuser:appuser /app /data/hf
+
+USER appuser
+
+# Optional: bake the checkpoint(s) into the image for offline startup.
+# Plain `python`, not `uv run`: uv run would re-sync and put the CPU torch back.
+ARG PRELOAD_MODEL=0
+ARG MODELS=english
+ENV MODELS=${MODELS}
+RUN if [ "$PRELOAD_MODEL" = "1" ]; then \
+        python -c "import os; from laya import Router; Router(device='cpu').preload([m.strip() for m in os.environ['MODELS'].split(',') if m.strip()])"; \
+    fi
+
+# torch >= 2.14 routes some eager CUDA ops (e.g. ModernBERT's rotary bmm) to Triton
+# kernels JIT-built at first use, which needs a C compiler this slim image does not
+# have ("Failed to find C compiler"). Use the prebuilt CUDA kernels instead: no JIT,
+# no toolchain in the image, and no compile stall on the first request.
+ENV TORCH_DISABLE_NATIVE_JIT=1
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 \
+    CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/healthz' % os.environ.get('PORT', '8000'))"
+
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
