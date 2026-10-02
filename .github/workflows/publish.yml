@@ -142,7 +142,7 @@ jobs:
 
   # Build each platform and model variant natively (no QEMU) and push by digest.
   build:
-    needs: lint
+    needs: [lint, checks]
     if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.platform_info.runner }}
     permissions:
@@ -218,7 +218,7 @@ jobs:
   # Published on branch/tag pushes and manual runs, but not on the nightly schedule
   # (the CUDA wheels do not change nightly, and each build downloads ~2.5 GB).
   build-cuda:
-    needs: lint
+    needs: [lint, checks]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
