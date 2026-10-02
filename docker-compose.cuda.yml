@@ -1,12 +1,15 @@
 # CUDA override: docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
 #
-# Requires the NVIDIA container toolkit and a host driver supporting the CUDA
-# version used by Dockerfile.cuda (cu126 -> R560+, override with TORCH_CUDA).
+# Rebuilds the same Dockerfile with the CUDA torch wheel. Requires the NVIDIA
+# container toolkit and a host driver supporting the requested CUDA version
+# (cu126 -> R560+, override with TORCH_CUDA).
 services:
   laya-api:
     build:
       context: .
-      dockerfile: Dockerfile.cuda
+      args:
+        TORCH_INDEX: https://download.pytorch.org/whl/${TORCH_CUDA:-cu126}
+        TORCH_DISABLE_NATIVE_JIT: "1"
     image: laya-api:cuda
     environment:
       # Hard-set to cuda so a DEVICE=cpu left in .env cannot silently disable GPU use.

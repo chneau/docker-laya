@@ -37,8 +37,8 @@ Built and published for `linux/amd64` and `linux/arm64`.
 - 🩺 **Healthcheck**: dedicated `/healthz` endpoint and container `HEALTHCHECK`.
 - 🪶 **CPU-Only Torch**: uses the PyTorch CPU wheel index (no CUDA), roughly
   `0.35s` per predict on CPU.
-- 🎮 **Optional CUDA Variant**: `Dockerfile.cuda` installs the CUDA torch wheel
-  (`cu126` by default) for GPU inference.
+- 🎮 **Optional CUDA Variant**: build the same Dockerfile with a CUDA `TORCH_INDEX`
+  (`cu126` by default) to install the CUDA torch wheel for GPU inference.
 - 🧠 **Memory-Aware Loading**: skips random weight initialization before loading
   checkpoints and trims the heap afterwards, avoiding the OOM spike on large encoders.
 
@@ -245,21 +245,31 @@ make up                       # docker compose up -d --build
 
 ### CUDA (GPU) Variant
 
-The default image is CPU-only. For GPU inference, build `Dockerfile.cuda`, which
-swaps the CPU torch wheel for the CUDA one (`cu126`, torch `2.14.0`). It needs the
-NVIDIA container toolkit and a host driver supporting the chosen CUDA version
-(cu126 requires R560+; override with `--build-arg TORCH_CUDA=cu130`).
+The default image is CPU-only. For GPU inference, build the same `Dockerfile` with
+`TORCH_INDEX` pointing at the CUDA wheel index (`cu126`, torch `2.14.0`) and
+`TORCH_DISABLE_NATIVE_JIT=1` so eager CUDA ops use prebuilt kernels instead of Triton
+JIT builds. It needs the NVIDIA container toolkit and a host driver supporting the
+chosen CUDA version (cu126 requires R560+; override with `TORCH_CUDA=cu130`).
 
 ```bash
-# Build and run a local CUDA image
+# Build and run a local CUDA image (TORCH_CUDA defaults to cu126)
 make build-cuda
-docker run --rm --gpus all -p 8000:8000 -e API_KEYS=key1 -v hf-cache:/data/hf laya-api:cuda
+docker run --rm --gpus all -p 8000:8000 -e API_KEYS=key1 -e DEVICE=cuda -v hf-cache:/data/hf laya-api:cuda
 
 # Or use the Compose override (adds the GPU device reservation and DEVICE=cuda)
 make up-cuda
 ```
 
 Bake checkpoints into the CUDA image with `make build-model-cuda MODEL=english`.
+
+For a raw build, pass the args directly:
+
+```bash
+docker build \
+  --build-arg TORCH_INDEX=https://download.pytorch.org/whl/cu126 \
+  --build-arg TORCH_DISABLE_NATIVE_JIT=1 \
+  -t laya-api:cuda .
+```
 
 The workflow builds the CUDA image on pull requests as a check, and publishes the
 `linux/amd64` variants (`cuda`, `english-cuda`, `multilingual-cuda`,
@@ -326,7 +336,7 @@ make test                       # pytest
 make run                        # uvicorn --reload on :8000
 make format / check / fix       # ruff, format and static checks
 make up / down / build / logs   # docker compose
-make build-cuda                 # CUDA image (Dockerfile.cuda)
+make build-cuda                 # CUDA image (adds the CUDA torch build args)
 make up-cuda                    # docker compose with the CUDA override
 ```
 
@@ -356,7 +366,7 @@ torch installed.
 - Runs as non-root (`appuser`, uid 10001); the `hf-cache` volume inherits that
   ownership. If you bind-mount your own cache, make sure uid 10001 can write it.
 - Torch uses the CPU wheel index (`pyproject.toml`); ~0.35s per predict on CPU.
-  `Dockerfile.cuda` swaps in the CUDA wheel for GPU inference.
+  Build with `TORCH_INDEX=.../cu126` to swap in the CUDA wheel for GPU inference.
 - Checkpoints load inside `transformers.initialization.no_init_weights()` and the
   glibc heap is trimmed afterwards, which avoids the >3.7 GB peak of the multilingual
   encoder and returns freed load buffers to the OS.

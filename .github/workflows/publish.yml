@@ -92,10 +92,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.cuda
           platforms: linux/amd64
           load: true
           tags: laya-api:cuda-test
+          build-args: |
+            TORCH_INDEX=https://download.pytorch.org/whl/cu126
+            TORCH_DISABLE_NATIVE_JIT=1
           cache-from: type=gha,scope=amd64-cuda-default
 
       - name: Container smoke test
@@ -261,9 +263,10 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.cuda
           platforms: linux/amd64
           build-args: |
+            TORCH_INDEX=https://download.pytorch.org/whl/cu126
+            TORCH_DISABLE_NATIVE_JIT=1
             PRELOAD_MODEL=${{ matrix.variant.preload }}
             MODELS=${{ matrix.variant.models }}
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true

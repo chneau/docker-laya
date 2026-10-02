@@ -14,7 +14,7 @@ help:
 	@echo "make down    - docker compose down"
 	@echo "make build   - docker build the image"
 	@echo "make build-model MODEL=english - build an image with one model baked in"
-	@echo "make build-cuda - docker build the CUDA image (Dockerfile.cuda)"
+	@echo "make build-cuda - docker build the CUDA image (TORCH_CUDA=$(TORCH_CUDA))"
 	@echo "make build-model-cuda MODEL=english - CUDA image with one model baked in"
 	@echo "make up-cuda - docker compose with the CUDA override (needs an NVIDIA GPU)"
 	@echo "make logs    - follow container logs"
@@ -53,10 +53,17 @@ build-model:
 	docker build --build-arg PRELOAD_MODEL=1 --build-arg MODELS=$(MODEL) -t laya-api:$(MODEL) .
 
 build-cuda:
-	docker build -f Dockerfile.cuda --build-arg TORCH_CUDA=$(TORCH_CUDA) -t laya-api:cuda .
+	docker build \
+		--build-arg TORCH_INDEX=https://download.pytorch.org/whl/$(TORCH_CUDA) \
+		--build-arg TORCH_DISABLE_NATIVE_JIT=1 \
+		-t laya-api:cuda .
 
 build-model-cuda:
-	docker build -f Dockerfile.cuda --build-arg TORCH_CUDA=$(TORCH_CUDA) --build-arg PRELOAD_MODEL=1 --build-arg MODELS=$(MODEL) -t laya-api:$(MODEL)-cuda .
+	docker build \
+		--build-arg TORCH_INDEX=https://download.pytorch.org/whl/$(TORCH_CUDA) \
+		--build-arg TORCH_DISABLE_NATIVE_JIT=1 \
+		--build-arg PRELOAD_MODEL=1 --build-arg MODELS=$(MODEL) \
+		-t laya-api:$(MODEL)-cuda .
 
 up-cuda:
 	docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
