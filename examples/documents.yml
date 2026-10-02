@@ -1,0 +1,338 @@
+# Sample documents sent by classify_categories.py.
+# The placeholders {company_name}, {tax_id} and {address} are filled in by the script.
+# To include literal braces in a text, write {{ and }}.
+documents:
+- filename: court_clearance.pdf
+  content: |
+    STATE OF ILLINOIS
+    CIRCUIT COURT
+    COUNTY OF SPRINGFIELD
+    CERTIFICATES SECTION
+    CRIMINAL COURT CLEARANCE CERTIFICATE
+    (LEGAL ENTITY / FIRST INSTANCE)
+
+    IT IS HEREBY CERTIFIED, at the request of the interested party, that a search of the
+    computerized records of the distribution service of this county, regarding the defendant
+    in criminal proceedings, found NO RECORD under the company name {company_name} and
+    tax ID {tax_id}.
+
+    IT IS FURTHER CERTIFIED that this certificate is valid for 30 (thirty) days from its
+    date of issuance.
+    The foregoing is true and I attest to it.
+
+    SPRINGFIELD
+    Monday, April 1, 2026 at 00:00:00
+
+        Notes:
+        a) the information provided is the responsibility of the requester and must be checked by
+        the interested party and/or recipient;
+
+        b) this certificate is exempt from fees under current legislation; and
+
+        c) this certificate, issued under National Council of Justice Resolution No. 121/2010,
+        IS NOT VALID FOR COURT FILINGS, FIREARM LICENSE REGISTRATION, ELECTION CANDIDACY
+        REGISTRATION OR NATURALIZATION;
+
+        d) the accuracy of the information can be confirmed using the footer details.
+- filename: labor_lawsuit.pdf
+  content: |
+    LABOR LAWSUIT
+    Case No. 0001234-56.2023.5.01.0001
+    Plaintiff: {company_name}
+    Defendant: John Smith
+    Claim Amount: $10,000.00
+    Judge: Dr. James Oliver
+    Filing Date: 03/15/2023
+    Nature of Action: Employment Claim
+    Summary of the Action:
+    The plaintiff, {company_name}, filed this labor
+    lawsuit against the defendant, John Smith, alleging that he
+    failed to comply with his contractual obligations, resulting in
+    financial losses for the company. The plaintiff seeks
+    an order requiring the defendant to pay compensation for material
+    and moral damages, as well as to settle his
+    outstanding employment obligations.
+- filename: bank_statement.pdf
+  content: |
+    BANK STATEMENT
+    Bank: First National Bank
+    Branch: 1234
+    Checking Account: 56789-0
+    Account Holder: {company_name}
+    Tax ID: {tax_id}
+    Period: 01/01/2023 to 01/31/2023
+
+    Date        Description                   Debit ($)      Credit ($)     Balance ($)
+    01/02/2023  Payment to Supplier ABC        1,500.00                      8,500.00
+    01/05/2023  Receipt from Client XYZ                       5,000.00      13,500.00
+    01/10/2023  Transfer to Savings Account    2,000.00                      11,500.00
+    01/15/2023  Payroll Payment                 3,000.00                      8,500.00
+    01/20/2023  Receipt from Client LMN                        2,500.00      11,000.00
+    01/25/2023  Tax Payment                     1,200.00                      9,800.00
+- filename: bank_credit_note.pdf
+  content: |2
+        BANK CREDIT NOTE NO. 00000000
+
+        I. ISSUE DATE: March 14, 2023.      II. PLACE OF ISSUE: City of Chicago, State of IL.
+
+        III. ISSUER: {company_name}
+        Address: {address}
+        Tax ID: {tax_id}
+
+        IV. CREDITOR:  ABC BANK CORP.
+                       Address: 803 City Garden Avenue, 2nd floor, Springfield, State of IL.
+                       Tax ID: 28-1956670
+
+        V. PRINCIPAL AMOUNT: $20,502,000.00 (Twenty Million Five Hundred And Two Thousand Dollars)
+
+        VI. CHARGES:   A) Credit opening fee: $0.00 (Zero)
+
+                       B) Tax on Credit, Exchange or Insurance Transactions: as provided by
+                       applicable legislation.
+
+                       C) Remunerative interest:
+                       100% (one hundred percent) of the interbank deposit rate, compounded daily,
+                       plus a rate of 6.1678% per year, equivalent to 0.5000% per month,
+                       calculated exponentially on a pro-rata temporis basis over a 360-day year.
+
+                       D) Compounding: Daily.
+
+        VII.   A) FINAL MATURITY: March 16, 2026.
+
+                                                     B) Term: number of days between the Disbursement
+                                                     Date and the Final Maturity date indicated in item "A"
+        above.
+
+        VIII. MANNER OF PAYMENT OF THE DEBT:
+
+        A)    Number of installments: 30 (thirty)
+
+        B)    Due dates and principal amount of each installment:
+
+        On    10/16/2023   Charges on the outstanding balance.
+        On    11/15/2023   Charges on the outstanding balance.
+        On    12/15/2023   Charges on the outstanding balance.
+        On    01/15/2024   Charges on the outstanding balance.
+        On    02/15/2024   Charges on the outstanding balance.
+        On    03/15/2024   Charges on the outstanding balance.
+        On    04/15/2024   $854,250.00 plus charges on the outstanding balance.
+        On    05/15/2024   $854,250.00 plus charges on the outstanding balance.
+        On    06/17/2024   $854,250.00 plus charges on the outstanding balance.
+        On    07/15/2024   $854,250.00 plus charges on the outstanding balance.
+        On    08/15/2024   $854,250.00 plus charges on the outstanding balance.
+        On    09/16/2024   $854,250.00 plus charges on the outstanding balance.
+        On    10/15/2024   $854,250.00 plus charges on the outstanding balance.
+        On    11/15/2024   $854,250.00 plus charges on the outstanding balance.
+        On    12/16/2024   $854,250.00 plus charges on the outstanding balance.
+        On    01/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    02/17/2025   $854,250.00 plus charges on the outstanding balance.
+        On    03/17/2025   $854,250.00 plus charges on the outstanding balance.
+        On    04/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    05/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    06/16/2025   $854,250.00 plus charges on the outstanding balance.
+        On    07/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    08/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    09/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    10/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    11/17/2025   $854,250.00 plus charges on the outstanding balance.
+        On    12/15/2025   $854,250.00 plus charges on the outstanding balance.
+        On    01/15/2026   $854,250.00 plus charges on the outstanding balance.
+        On    02/16/2026   $854,250.00 plus charges on the outstanding balance.
+        On    03/16/2026   $854,250.00 plus charges on the outstanding balance.
+
+        C)    Interest on the outstanding balance
+
+                                                        Page 1 of 8
+            To contact the bank's ombudsman, call 1-800-555-0134 from 9:00 to 13:00 and 14:00 to
+            18:00, or email ombudsman@abcbank.example
+        TEMPLATE - Unified Corporate Credit Note with Supplementary Guarantee - 2023.02.08 - Version 1.0
+
+
+    --- Page 2 ---
+    BANK        0000000
+
+    CORP.
+
+    IX. PLACE OF PAYMENT: City of Chicago, State of IL.
+
+    X. GUARANTOR(S)/CO-OBLIGOR(S), hereinafter referred to simply as GUARANTOR(S)/CO-OBLIGOR(S):
+
+    (1) Name: EDWARD PAIVA RAMOS
+    Personal ID: 284-51-7639
+    Marital Status: SINGLE
+    Occupation: Business Owner
+    Address: 3150 Garden Avenue, Apt 1502
+    District: Garden District
+    City: Springfield
+    State: ILLINOIS
+
+    (2) Name: PATRICIA NUNES SALES
+    Personal ID: 731-06-2548
+    Marital Status: MARRIED
+    Marital Regime: PARTIAL COMMUNITY PROPERTY
+    Occupation: Business Owner
+    Address: 875 Pine Street, House 12
+    District: Old Town
+    City: Springfield
+    State: ILLINOIS
+    Spouse Name: RODRIGO MENDES FARIAS SALES
+    Spouse Personal ID: 519-37-4826
+    Spouse Occupation: Business Owner
+
+    XI. GUARANTEES:
+
+    Supplementary guarantee from the Investment Guarantee Fund, administered by the National Bank
+    for Economic and Social Development, under clause 6-A below.
+
+    Fiduciary guarantees under separate instruments.
+
+    XII. Financial Compensation Amount on Early Settlement: $0.17 (Seventeen
+    Cents) per day per $1,000.00 unit settled early, under clause 7 below.
+
+    XIII. THIRD-PARTY GUARANTORS:
+
+    None.
+
+    1.                                        PAYMENT PROMISE: By this bank credit note
+    ("CCN"), issued under Law 10.931 of August 2,
+                                        2004, the ISSUER undertakes to pay the CREDITOR, or its order, on
+                                        the maturity date(s) of the installment(s) set in item
+                            VIII of the Preamble, in national currency, the amount(s) set in item
+                            VIII of the Preamble, corresponding to the credit granted
+                                        by the CREDITOR to the ISSUER, plus the remunerative interest
+                                        set and calculated under item VI, subitem "C" of the
+                                Preamble, and under clause 2 below, and any other amounts owed by
+                                the ISSUER under this instrument, which the ISSUER acknowledges,
+                            hereby, irrevocably and irreversibly, as liquid, certain and
+                            payable on the maturity dates set in item VIII of the
+    Preamble.
+
+        1.1.                                           The funds corresponding to the credit granted by
+        the CREDITOR to the ISSUER, in the Principal Amount set in item V of the
+        Preamble, will be made available to the ISSUER by wire transfer or deposit into a bank
+        account held by the ISSUER and indicated to the CREDITOR, on the date when (i) the CREDITOR
+        has verified that the conditions agreed by the parties are met, and (ii) the guarantee(s)
+        linked to this transaction have been, at the CREDITOR's sole discretion, effectively
+        constituted ("Disbursement Date"), which is why the term initially foreseen for the
+        transaction is subject to change, since the Final Maturity date indicated in item VII "A"
+        of the Preamble above will not change regardless of the actual disbursement date of the credit.
+
+        1.1.1.                                 The disbursement of the credit represented by this CCN is at
+        the CREDITOR's sole discretion, which will assess, among other
+        conditions but not limited to, the good and correct legal formalization of this CCN and other
+        related instruments, as well as the
+        effective and correct registration of the guarantees, and the CREDITOR may therefore decide
+        at any time, and
+        regardless of any justification, to cancel the transaction and not disburse the funds, with the
+        ISSUER
+        bearing all expenses and costs incurred up to that cancellation.
+
+        1.2.                                        The ISSUER undertakes to pay the CREDITOR the Tax on
+        Credit, Exchange or Insurance Transactions and the credit opening fee set in item VI of the
+        Preamble, when the CREDITOR disburses the funds referred to in clause 1.1 above, and hereby
+        irrevocably and irreversibly authorizes the CREDITOR to debit from the checking account held
+        by the ISSUER with the CREDITOR the amounts corresponding to that tax and fee on the date the
+        funds referred to in clause 1.1 above are released, when that account holds freely available
+        funds.
+
+        Page 2 of 8
+            To contact the bank's ombudsman, call 1-800-555-0134 from 9:00 to 13:00 and 14:00 to
+            18:00, or email ombudsman@abcbank.example
+    TEMPLATE - Unified Corporate Credit Note with Supplementary Guarantee - 2023.02.08 - Version 1.0
+- filename: partner_assets_income_tax.pdf
+  content: |
+    DEPARTMENT OF THE TREASURY
+    INTERNAL REVENUE SERVICE
+    INDIVIDUAL INCOME TAX
+    ANNUAL ADJUSTMENT RETURN - TAX YEAR 2025 - CALENDAR YEAR 2024
+
+    NAME: EDWARD PAIVA RAMOS                                     Personal ID: 284-51-7639
+    PRIMARY OCCUPATION: Partner or company officer
+    ADDRESS: 3150 Garden Avenue, Apt 1502 - Garden District - Springfield/IL
+
+    STATEMENT OF ASSETS AND RIGHTS                                      Amounts in Dollars
+
+    Group  Code  Description                                                        12/31/2023      12/31/2024
+    01     11      Residential apartment at 3150 Garden Avenue, Apt 1502,               1,250,000.00    1,250,000.00
+                   Springfield/IL, registry 48,213 of the 1st Real Estate Registry of Springfield,
+                   acquired in 2019.
+    01     14      Urban lot in the Green Village subdivision, lot 12, block C,            320,000.00      320,000.00
+                   Rivertown/IL, registry 9,874.
+    02     01      Toyota Hilux SRX 2022 vehicle, plate QYR-4B21, registration             245,000.00      245,000.00
+                   01298765432, purchased outright.
+    02     01      Honda Civic Touring 2021 vehicle, plate PCZ-7E58.                      138,000.00            0.00
+                   Pledged in 08/2024.
+    03     01      Equity interest: 60% of the shares of
+                   {company_name}, tax ID {tax_id}.                                    1,800,000.00    1,800,000.00
+    04     02      CDB investment at First National Bank, branch 1234.                    410,500.00      462,300.00
+
+    TOTAL                                                                            4,163,500.00    4,077,300.00
+
+    DEBTS AND ENCUMBRANCES
+    None.
+
+    I declare, under penalty of law, that the information provided is true.
+    Springfield, April 28, 2025.
+- filename: company_fixed_assets.pdf
+  content: |
+    {company_name}
+    Tax ID: {tax_id}
+    Address: {address}
+
+    FIXED ASSET REGISTER - POSITION AS OF 12/31/2024
+    Issued by the accounting department for credit analysis purposes
+
+    Item  Description                                           Acquisition   Book Value ($)   Status
+    01    Industrial warehouse of 2,400 m2, 880 Rio Branco St,   03/2016     3,450,000.00       Owned
+          Industrial District of Springfield/IL, registry 21,557
+    02    Commercial office 1204, Springfield Tower Business Center, 07/2019  780,000.00       Owned
+          Garden District, Springfield/IL, registry 63,109
+    03    Mercedes-Benz Accelo 1016 truck, plate RZK-3D41       02/2022       395,000.00       Fiduciary
+    04    Volkswagen Delivery 11.180 truck, plate SBA-9F07      09/2023       362,000.00       Owned
+    05    Hyster H50FT forklift, serial 44721                   05/2021       118,000.00       Owned
+    06    Modular cold room 60 m3 with temperature control      11/2020       214,500.00       Owned
+    07    Servers, computers and IT equipment                   various        96,300.00       Owned
+    08    Furniture and fixtures                                various        72,800.00       Owned
+
+    TOTAL FIXED ASSETS (net book value)                                    5,488,600.00
+
+    The assets are registered in the name of the legal entity and depreciated under tax legislation.
+    The truck in item 03 is pledged in favor of First National Bank as loan collateral.
+
+    Springfield, January 15, 2025.
+    Responsible accountant: Marcel Antunes Figueira - CPA 021458
+- filename: tax_liability_notice.pdf
+  content: |
+    DEPARTMENT OF THE TREASURY
+    INTERNAL REVENUE SERVICE
+    NATIONAL TAX AUTHORITY
+
+    TAX SITUATION REPORT
+    Query date: 02/20/2025 10:42:17
+
+    Tax ID: {tax_id}
+    Business name: {company_name}
+    Address: {address}
+
+    OUTSTANDING DEBTS
+    Tax     Period      Due Date     Original Value   Outstanding    Penalty    Interest    Status
+    2172-01  11/2024     12/20/2024       182,430.15      182,430.15   36,486.03    2,918.88   DEBTOR
+    8109-02  11/2024     12/20/2024        39,602.77       39,602.77    7,920.55      633.64   DEBTOR
+    0561-07  12/2024     01/20/2025        58,114.90       58,114.90    1,917.79      581.15   DEBTOR
+
+    ACTIVE TAX DEBT REGISTRATIONS
+    Registration       Tax              Registration Date   Consolidated Value   Status
+    40.6.23.012345-08  Corporate income  07/14/2023            1,284,550.31   ACTIVE COLLECTION
+    40.2.23.012346-99  Social contribution 07/14/2023         472,118.62   ACTIVE COLLECTION
+    40.4.24.004512-17  Sales tax         03/22/2024              913,407.40   ENFORCEABLE
+
+    INSTALLMENT PLAN
+    Type: Exceptional Transaction - Law 13.988/2020
+    Plan number: 0012345-2024   Overdue installments: 3   Outstanding balance: $648,920.15
+
+    PENALTY NOTICE
+    Administrative case No. 10480.721456/2024-11 - Penalty for failure to pay sales taxes
+    Assessed value: $356,210.00 - Status: awaiting judgment
+
+    Total debts with no suspended enforceability: $3,899,867.57
+    This report does not replace the tax compliance certificate.

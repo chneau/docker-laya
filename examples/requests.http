@@ -1,0 +1,226 @@
+# Run each block separately with the VS Code REST Client.
+# Basic authentication uses BASIC_AUTH from the root .env (user:password).
+# The client walks up the directories to find that file and preserves ':' in the password.
+@baseUrl = http://localhost:8000
+@basicAuth = {{$dotenv BASIC_AUTH}}
+
+### 01. Health: public endpoint, no authentication
+GET {{baseUrl}}/healthz
+
+### 02. Available and loaded checkpoints
+GET {{baseUrl}}/models
+Authorization: Basic {{basicAuth}}
+
+### 03. Available presets
+GET {{baseUrl}}/presets
+Authorization: Basic {{basicAuth}}
+
+### 04. Detect the language before choosing a model
+POST {{baseUrl}}/detect
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": "My invoice was charged twice."
+}
+
+### 05. Clean and structure an email; use the response as state in another prediction
+POST {{baseUrl}}/email/state
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "subject": "Duplicate charge",
+  "body": "Hello, I was charged twice this month. I need help.\n\nBest regards,\nCustomer",
+  "sender": "customer@example.com",
+  "clean": true
+}
+
+### 06. Pick ONE category from a LIST of categories
+POST {{baseUrl}}/predict
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": "My invoice was charged twice. I need a refund.",
+  "model": "multilingual",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which category best describes this message?",
+      "criteria": ["billing", "technical_support", "sales", "cancellation", "other"]
+    }
+  }
+}
+
+### 07. Categories with descriptions: useful to explain similar options
+POST {{baseUrl}}/predict
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": "I cannot access my account after switching phones.",
+  "model": "multilingual",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which team should handle this request?",
+      "criteria": {
+        "billing": "Invoices, payments, charges and refunds.",
+        "technical_support": "Errors, access problems and application failures.",
+        "sales": "Prices, plans and new subscriptions.",
+        "cancellation": "Ending a contract or subscription.",
+        "other": "Topics not covered by the other categories."
+      }
+    }
+  }
+}
+
+### 08. Combine a category, an urgency score and a binary decision
+POST {{baseUrl}}/predict
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": "The system is down and our entire team is blocked. Please refund today's charge.",
+  "model": "typed-decisions",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which team should handle this request?",
+      "criteria": ["billing", "technical_support", "sales"]
+    },
+    "urgency": {
+      "type": "score",
+      "instructions": "How urgent is this request?",
+      "criteria": ["low", "medium", "high", "critical"]
+    },
+    "refund": {
+      "type": "noul",
+      "instructions": "Does the customer request a refund?",
+      "criteria": {"false": "No refund requested.", "true": "A refund is requested."}
+    }
+  }
+}
+
+### 09. Classify an entire conversation
+POST {{baseUrl}}/predict
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": [
+    {"role": "user", "content": "I want to cancel my subscription."},
+    {"role": "assistant", "content": "May I ask the reason?"},
+    {"role": "user", "content": "I will not use the service anymore."}
+  ],
+  "model": "multilingual",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "What is the customer's main intent in this conversation?",
+      "criteria": ["signup", "question", "cancellation", "support"]
+    }
+  }
+}
+
+### 10. Use a JSON object as the state
+POST {{baseUrl}}/predict
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": {
+    "subject": "Quote for 50 users",
+    "message": "I would like to learn about the business plans.",
+    "channel": "email"
+  },
+  "model": "multilingual",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which category matches this request?",
+      "criteria": ["sales", "billing", "technical_support"]
+    }
+  }
+}
+
+### 11. Use a preset without sending questions; omitting model allows automatic routing
+POST {{baseUrl}}/predict
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": "I was billed twice this month. Please refund the duplicate charge.",
+  "preset": "triage"
+}
+
+### 12. Classify several texts with the same list of categories
+POST {{baseUrl}}/predict/bulk
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "states": [
+    "I need a copy of the invoice.",
+    "The application shows an error on startup.",
+    "I want to buy a plan for my company."
+  ],
+  "model": "multilingual",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which category best describes this message?",
+      "criteria": ["billing", "technical_support", "sales", "other"]
+    }
+  }
+}
+
+### 13. Batch with a model and questions specific to each item (no shared preset)
+POST {{baseUrl}}/predict/bulk
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "model": "multilingual",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which category best describes this message?",
+      "criteria": ["billing", "technical_support", "sales"]
+    }
+  },
+  "items": [
+    {"state": "I need an invoice."},
+    {
+      "state": "Please cancel my subscription.",
+      "model": "english",
+      "questions": {
+        "intent": {
+          "type": "choice",
+          "instructions": "What is the customer's intent?",
+          "criteria": ["cancel", "upgrade", "support"]
+        }
+      }
+    }
+  ]
+}
+
+### 14. SystemOne / TypeSafe compatible format
+POST {{baseUrl}}/v1/systemone
+Authorization: Basic {{basicAuth}}
+Content-Type: application/json
+
+{
+  "state": "I would like to know the prices of the business plan.",
+  "model": "laya-multilingual",
+  "session_id": "example-categories-001",
+  "user": "example-user",
+  "questions": {
+    "category": {
+      "type": "choice",
+      "instructions": "Which category best describes this message?",
+      "criteria": ["billing", "technical_support", "sales", "other"]
+    }
+  }
+}

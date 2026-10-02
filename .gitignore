@@ -3,7 +3,5 @@ __pycache__
 *.pyc
 .env
 .ruff_cache
-.history
 .pytest_cache
 .mypy_cache
-.lh
