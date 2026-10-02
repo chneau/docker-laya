@@ -12,7 +12,6 @@ dependencies = [
     "torch>=2.5",
     "transformers>=4.48",
     "python-dotenv>=1.2.3",
-    "httpx>=0.28.1",
 ]
 
 [tool.uv]

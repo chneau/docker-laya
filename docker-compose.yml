@@ -4,24 +4,22 @@ services:
       context: .
       args:
         PRELOAD_MODEL: ${PRELOAD_MODEL:-0}
-        MODELS: ${MODELS:-multilingual}
+        MODELS: ${MODELS:-english}
     image: laya-api:latest
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
     environment:
       PORT: ${PORT:-8000}
-      API_KEYS: ${API_KEYS:-}
+      API_KEYS: ${API_KEYS:-change-me}
       BASIC_AUTH: ${BASIC_AUTH:-}
       MAX_BULK_ITEMS: ${MAX_BULK_ITEMS:-}
-      MODELS: ${MODELS:-multilingual}
+      MODELS: ${MODELS:-english}
       MODEL_ID: ${MODEL_ID:-convaiinnovations/laya}
-      MODEL_SUBFOLDER: ${MODEL_SUBFOLDER:-multilingual}
+      MODEL_SUBFOLDER: ${MODEL_SUBFOLDER:-}
       DEVICE: ${DEVICE:-cpu}
       HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - hf-cache:/data/hf
-    # The multilingual checkpoint runs in ~1.9 GB. Raise this when MODELS preloads several checkpoints.
-    mem_limit: ${MEM_LIMIT:-2g}
     restart: unless-stopped
 
 volumes:

@@ -1,0 +1,19 @@
+# CUDA override: docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
+#
+# Requires the NVIDIA container toolkit and a host driver supporting the CUDA
+# version used by Dockerfile.cuda (cu126 -> R560+, override with TORCH_CUDA).
+services:
+  laya-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.cuda
+    image: laya-api:cuda
+    environment:
+      DEVICE: ${DEVICE:-cuda}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
