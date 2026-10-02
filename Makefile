@@ -1,4 +1,5 @@
 PORT ?= 8000
+TORCH_CUDA ?= cu126
 
 .PHONY: help run format check test fix openapi up down build build-model build-cuda build-model-cuda up-cuda logs
 
@@ -52,10 +53,10 @@ build-model:
 	docker build --build-arg PRELOAD_MODEL=1 --build-arg MODELS=$(MODEL) -t laya-api:$(MODEL) .
 
 build-cuda:
-	docker build -f Dockerfile.cuda -t laya-api:cuda .
+	docker build -f Dockerfile.cuda --build-arg TORCH_CUDA=$(TORCH_CUDA) -t laya-api:cuda .
 
 build-model-cuda:
-	docker build -f Dockerfile.cuda --build-arg PRELOAD_MODEL=1 --build-arg MODELS=$(MODEL) -t laya-api:$(MODEL)-cuda .
+	docker build -f Dockerfile.cuda --build-arg TORCH_CUDA=$(TORCH_CUDA) --build-arg PRELOAD_MODEL=1 --build-arg MODELS=$(MODEL) -t laya-api:$(MODEL)-cuda .
 
 up-cuda:
 	docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build

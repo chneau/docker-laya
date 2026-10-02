@@ -54,7 +54,7 @@ class ModelRuntime:
 
     def health(self) -> HealthResponse:
         """Readiness and configuration, available before the models load."""
-        loaded = list(self._router.loaded) if self._router else []
+        loaded = list(self._router.loaded) if self._router is not None else []
         return HealthResponse(
             status="ok",
             model_loaded=self._router is not None,

@@ -59,7 +59,7 @@ Multi-architecture images (`linux/amd64` and `linux/arm64`) are published to Git
 
 | Image Tag | Preloaded Models | Image Size | Description |
 | :--- | :--- | :--- | :--- |
-| `ghcr.io/chneau/laya:latest` (or `v0.6.1`) | None (Dynamic) | ~300 MB | **Slim / Default**: Small image size. Downloads model on first run into `/data/hf`. |
+| `ghcr.io/chneau/laya:latest` (or `0.6.1`) | None (Dynamic) | ~300 MB | **Slim / Default**: Small image size. Downloads model on first run into `/data/hf`. |
 | `ghcr.io/chneau/laya:english` | `english` | ~1.3 GB | **Instant Startup (English)**: Pre-baked English checkpoint, offline-ready. |
 | `ghcr.io/chneau/laya:multilingual` | `multilingual` | ~1.8 GB | **Instant Startup (Multilingual)**: Pre-baked multilingual checkpoint. |
 | `ghcr.io/chneau/laya:typed-decisions` | `typed-decisions` | ~1.3 GB | **Instant Startup (Typed Decisions)**: Pre-baked typed decisions checkpoint. |

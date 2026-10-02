@@ -9,7 +9,8 @@ services:
       dockerfile: Dockerfile.cuda
     image: laya-api:cuda
     environment:
-      DEVICE: ${DEVICE:-cuda}
+      # Hard-set to cuda so a DEVICE=cpu left in .env cannot silently disable GPU use.
+      DEVICE: cuda
     deploy:
       resources:
         reservations:
