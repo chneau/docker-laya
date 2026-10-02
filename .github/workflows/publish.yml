@@ -6,6 +6,8 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * *"
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/laya
@@ -30,7 +32,28 @@ jobs:
 
       - name: Validate OpenAPI schema
         run: |
-          uv run --no-project --with 'fastapi>=0.115' --with 'pydantic>=2' python -c "import sys; sys.path.insert(0, '.'); from app.main import app; s = app.openapi(); assert '/v1/systemone' in s['paths'] and '/predict' in s['paths']; print('openapi ok:', list(s['paths']))"
+          uv run --no-project --with 'fastapi>=0.115' --with 'pydantic>=2' --with 'python-dotenv>=1.2' python -c "import sys; sys.path.insert(0, '.'); from app.main import app; s = app.openapi(); assert '/v1/systemone' in s['paths'] and '/predict' in s['paths']; print('openapi ok:', list(s['paths']))"
+
+  # Unit and HTTP contract tests plus static typing. Torch is not needed because
+  # the tests substitute the Laya boundary.
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --locked --group dev --no-install-package torch
+
+      - name: Tests
+        run: uv run --no-sync pytest
+
+      - name: Static checks
+        run: |
+          uv run --no-sync mypy
+          uv run --no-sync pyright
 
   # Pull requests: build the image once and check it boots.
   test:
@@ -54,9 +77,34 @@ jobs:
         run: |
           docker run --rm --entrypoint python laya-api:test -c "from app.main import app; s = app.openapi(); assert '/v1/systemone' in s['paths'] and '/predict' in s['paths']; print('container ok')"
 
-  # Manual / release: real model download + inference.
+  # Pull requests: build the CUDA image once and check it boots. No GPU is needed
+  # to build; only to run it.
+  cuda:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build CUDA image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.cuda
+          platforms: linux/amd64
+          load: true
+          tags: laya-api:cuda-test
+          cache-from: type=gha,scope=amd64-cuda-default
+
+      - name: Container smoke test
+        run: |
+          docker run --rm --entrypoint python laya-api:cuda-test -c "from app.main import app; s = app.openapi(); assert '/v1/systemone' in s['paths'] and '/predict' in s['paths']; print('cuda container ok')"
+
+  # Nightly / manual / release: real model download + inference.
   smoke:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -93,14 +141,9 @@ jobs:
           docker rm -f laya-api
 
   # Build each platform and model variant natively (no QEMU) and push by digest.
-  # smoke is skipped on plain branch pushes, so always() keeps build from being skipped with it.
   build:
-    needs: [lint, smoke]
-    if: >-
-      always()
-      && github.event_name != 'pull_request'
-      && needs.lint.result == 'success'
-      && (needs.smoke.result == 'success' || needs.smoke.result == 'skipped')
+    needs: lint
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.platform_info.runner }}
     permissions:
       contents: read
@@ -171,11 +214,79 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # CUDA variants, linux/amd64 only: PyTorch's CUDA wheels are x86_64.
+  # Published on branch/tag pushes and manual runs, but not on the nightly schedule
+  # (the CUDA wheels do not change nightly, and each build downloads ~2.5 GB).
+  build-cuda:
+    needs: lint
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - name: default
+            preload: "0"
+            models: "english"
+          - name: english
+            preload: "1"
+            models: "english"
+          - name: multilingual
+            preload: "1"
+            models: "multilingual"
+          - name: typed-decisions
+            preload: "1"
+            models: "typed-decisions"
+          - name: all
+            preload: "1"
+            models: "english,multilingual,typed-decisions"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.cuda
+          platforms: linux/amd64
+          build-args: |
+            PRELOAD_MODEL=${{ matrix.variant.preload }}
+            MODELS=${{ matrix.variant.models }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=amd64-cuda-${{ matrix.variant.name }}
+          cache-to: type=gha,mode=max,scope=amd64-cuda-${{ matrix.variant.name }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-cuda-${{ matrix.variant.name }}-amd64
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
   # Combine per-platform digests into multi-arch manifest lists for each variant.
   merge:
     needs: build
-    # A skipped smoke upstream would otherwise skip merge transitively.
-    if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -221,6 +332,64 @@ jobs:
             type=ref,event=branch,suffix=${{ matrix.variant.name != 'default' && format('-{0}', matrix.variant.name) || '' }}
             type=semver,pattern={{version}},suffix=${{ matrix.variant.name != 'default' && format('-{0}', matrix.variant.name) || '' }}
             type=semver,pattern={{major}}.{{minor}},suffix=${{ matrix.variant.name != 'default' && format('-{0}', matrix.variant.name) || '' }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: docker buildx imagetools inspect $(jq -r '.tags[0]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+
+  # Combine the CUDA digests into single-platform manifest lists for each variant.
+  merge-cuda:
+    needs: build-cuda
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - name: default
+          - name: english
+          - name: multilingual
+          - name: typed-decisions
+          - name: all
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-cuda-${{ matrix.variant.name }}-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=cuda,enable=${{ matrix.variant.name == 'default' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+            type=raw,value=cuda,enable=${{ matrix.variant.name == 'default' && startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=${{ matrix.variant.name }}-cuda,enable=${{ matrix.variant.name != 'default' }}
+            type=ref,event=branch,suffix=${{ matrix.variant.name != 'default' && format('-{0}', matrix.variant.name) || '' }}-cuda
+            type=semver,pattern={{version}},suffix=${{ matrix.variant.name != 'default' && format('-{0}', matrix.variant.name) || '' }}-cuda
+            type=semver,pattern={{major}}.{{minor}},suffix=${{ matrix.variant.name != 'default' && format('-{0}', matrix.variant.name) || '' }}-cuda
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
