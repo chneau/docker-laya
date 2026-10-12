@@ -5,13 +5,13 @@ description = "Dockerized Laya prediction API"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "laya>=0.3.4",
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.30",
-    "pydantic>=2.7",
-    "torch>=2.5",
-    "transformers>=5",
-    "python-dotenv>=1.2.3",
+    "laya>=0.4.6",
+    "fastapi>=0.143.0",
+    "uvicorn[standard]>=0.54.0",
+    "pydantic>=2.14.1",
+    "torch>=2.14.1",
+    "transformers>=5.19.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [tool.uv]
@@ -19,11 +19,11 @@ package = false
 
 [dependency-groups]
 dev = [
-    "ruff>=0.9",
-    "pytest>=8",
-    "httpx>=0.27",
-    "mypy>=1.19",
-    "pyright>=1.1.400",
+    "ruff>=0.17.0",
+    "pytest>=9.1.1",
+    "httpx>=0.28.1",
+    "mypy>=2.4.0",
+    "pyright>=1.1.414",
 ]
 
 [tool.pytest.ini_options]
