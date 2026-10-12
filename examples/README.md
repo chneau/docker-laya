@@ -25,7 +25,7 @@ directory, so no terminal variables are needed.
 
    The file declares its dependencies (`httpx`, `pydantic`, `python-dotenv` and
    `pyyaml`) so `uv` prepares an isolated environment. The client requires Python
-   3.14+, like the project.
+   3.15+, like the project.
 
 3. Edit `self.categories` in `LayaCategoryClient.__init__` to use your own categories
    and [documents.yml](documents.yml) to use your own texts. The placeholders

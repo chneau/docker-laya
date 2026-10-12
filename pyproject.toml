@@ -3,7 +3,7 @@ name = "laya-api"
 version = "0.1.0"
 description = "Dockerized Laya prediction API"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 dependencies = [
     "laya>=0.4.6",
     "fastapi>=0.143.0",
@@ -30,12 +30,12 @@ dev = [
 testpaths = ["tests"]
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.15"
 strict = true
 files = ["app", "tests"]
 
 [tool.pyright]
-pythonVersion = "3.14"
+pythonVersion = "3.15"
 typeCheckingMode = "standard"
 include = ["app", "tests"]
 venvPath = "."
@@ -51,7 +51,7 @@ torch = { index = "pytorch-cpu" }
 
 [tool.ruff]
 line-length = 120
-target-version = "py314"
+target-version = "py315"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4", "SIM", "D"]

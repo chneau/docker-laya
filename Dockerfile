@@ -1,4 +1,8 @@
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+FROM debian:bookworm-slim
+
+# uv is copied in as a static binary and provisions the interpreter itself, so
+# the image is not tied to whichever Python version a base tag happens to ship.
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 LABEL org.opencontainers.image.title="laya-api" \
       org.opencontainers.image.description="Laya typed-decision prediction API" \
@@ -10,7 +14,7 @@ LABEL org.opencontainers.image.title="laya-api" \
 # NVIDIA container runtime (--gpus all / compose device reservations).
 #
 # cu126 needs a host driver with CUDA >= 12.6 (R560+); use .../cu130 on newer ones.
-ARG TORCH_VERSION=2.14.0
+ARG TORCH_VERSION=2.14.1
 ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
 ARG TORCH_DISABLE_NATIVE_JIT=0
 
@@ -18,10 +22,19 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
+    UV_PYTHON_INSTALL_DIR=/opt/python \
     HF_HOME=/data/hf \
     PORT=8000 \
     TORCH_DISABLE_NATIVE_JIT=${TORCH_DISABLE_NATIVE_JIT} \
     PATH="/app/.venv/bin:$PATH"
+
+# ca-certificates/netbase/tzdata mirror Astral's own bookworm-slim image. The
+# interpreter is installed into a world-readable prefix because the venv links
+# to it and the container runs as the unprivileged appuser.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates netbase tzdata \
+ && rm -rf /var/lib/apt/lists/* \
+ && uv python install 3.15
 
 RUN useradd --create-home --uid 10001 appuser
 

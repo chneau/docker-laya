@@ -1,8 +1,8 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.15"
 # ///
-"""Bump the lower bounds in pyproject.toml to the versions pinned in uv.lock."""
+"""Bump the lower bounds in pyproject.toml and the pinned torch version to uv.lock."""
 
 import re
 import tomllib
@@ -11,10 +11,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PYPROJECT = ROOT / "pyproject.toml"
 LOCKFILE = ROOT / "uv.lock"
+DOCKERFILE = ROOT / "Dockerfile"
+README = ROOT / "README.md"
 
 REQUIREMENT = re.compile(r'^(\s*)"([^"]+)"(.*)', re.DOTALL)
 NAME = re.compile(r"^[A-Za-z0-9._-]+")
 EXTRAS = re.compile(r"^(\[[^\]]*\])?")
+TORCH_ARG = re.compile(r"(?m)^(ARG TORCH_VERSION=)\S+")
+TORCH_DOC = re.compile(r"(torch `)\d+\.\d+(?:\.\d+)?(`)")
 
 
 def direct_dependency_names(pyproject: dict) -> list[str]:
@@ -57,8 +61,14 @@ def bump_requirement(line: str, names: set[str], versions: dict[str, str]) -> st
     return f'{indent}"{name}{suffix or ""}>={versions[name]}"{rest}'
 
 
+def sync_torch_version(text: str, version: str) -> str:
+    """Replace pinned torch versions (Dockerfile arg, README prose) with the locked one."""
+    text = TORCH_ARG.sub(rf"\g<1>{version}", text)
+    return TORCH_DOC.sub(rf"\g<1>{version}\g<2>", text)
+
+
 def main() -> None:
-    """Rewrite pyproject.toml lower bounds using the current uv.lock versions."""
+    """Pin pyproject.toml lower bounds and the torch version to the current uv.lock."""
     pyproject = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
     lock = tomllib.loads(LOCKFILE.read_text(encoding="utf-8"))
     names = direct_dependency_names(pyproject)
@@ -71,6 +81,9 @@ def main() -> None:
         for line in PYPROJECT.read_text(encoding="utf-8").splitlines(keepends=True)
     ]
     PYPROJECT.write_text("".join(updated), encoding="utf-8")
+    for path in (DOCKERFILE, README):
+        text = path.read_text(encoding="utf-8")
+        path.write_text(sync_torch_version(text, versions["torch"]), encoding="utf-8")
 
 
 if __name__ == "__main__":

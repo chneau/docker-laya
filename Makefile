@@ -9,7 +9,7 @@ help:
 	@echo "make check   - check lint, docstrings, formatting and static types"
 	@echo "make test    - run service and HTTP regression tests"
 	@echo "make fix     - lint and auto-fix with ruff"
-	@echo "make update  - upgrade dependencies and bump pyproject.toml lower bounds"
+	@echo "make update  - upgrade dependencies and sync pinned versions"
 	@echo "make openapi - regenerate openapi.json"
 	@echo "make up      - docker compose up --build (detached)"
 	@echo "make down    - docker compose down"

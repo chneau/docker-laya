@@ -246,7 +246,7 @@ make up                       # docker compose up -d --build
 ### CUDA (GPU) Variant
 
 The default image is CPU-only. For GPU inference, build the same `Dockerfile` with
-`TORCH_INDEX` pointing at the CUDA wheel index (`cu126`, torch `2.14.0`) and
+`TORCH_INDEX` pointing at the CUDA wheel index (`cu126`, torch `2.14.1`) and
 `TORCH_DISABLE_NATIVE_JIT=1` so eager CUDA ops use prebuilt kernels instead of Triton
 JIT builds. It needs the NVIDIA container toolkit and a host driver supporting the
 chosen CUDA version (cu126 requires R560+; override with `TORCH_CUDA=cu130`).
@@ -310,7 +310,7 @@ make openapi
 
 ## 🧪 Testing Locally
 
-The project requires **Python 3.14+** and uses **uv** for dependencies:
+The project requires **Python 3.15+** and uses **uv** for dependencies:
 
 ```bash
 uv sync --group dev          # install runtime and development dependencies
