@@ -6,7 +6,7 @@ from dataclasses import FrozenInstanceError
 from unittest.mock import patch
 
 import pytest
-from httpx import Response
+from httpx2 import Response
 
 from app.config import ENV_FILE, Settings, load_local_environment
 from tests.support import ServiceContext
